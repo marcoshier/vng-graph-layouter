@@ -4,12 +4,11 @@ import ProjectDescription
 import org.openrndr.color.ColorRGBa
 import org.openrndr.draw.Drawer
 import org.openrndr.draw.defaultFontMap
-import org.openrndr.extra.kdtree.KDTreeNode
 import org.openrndr.extra.kdtree.buildKDTree
 import org.openrndr.extra.noise.uniform
+import org.openrndr.math.Polar
 import org.openrndr.math.Vector2
-import org.openrndr.shape.Rectangle
-import kotlin.math.pow
+import org.openrndr.shape.SegmentIntersection
 
 /**
     XPBD-based Graph Layouter
@@ -17,41 +16,49 @@ import kotlin.math.pow
 
 class Graph(val origin: Vector2) {
 
-    val nodes = mutableListOf<Node>()
-    val edges = mutableListOf<Edge>()
+    val nodes = mutableListOf<GraphNode>()
+    val edges = mutableListOf<GraphEdge>()
 
-    var kd: KDTreeNode<Node>
+    var kd = buildKDTree(nodes, 2, ::nodeMapper)
 
-    init {
-        nodes.add(Node(origin))
+    fun init(data: ProjectDescription) {
+        val root = GraphNode(origin, data = data)
+
+        nodes.add(root)
         kd = buildKDTree(nodes, 2, ::nodeMapper)
+
+        populate(root)
     }
 
-    private fun addChildren(parent: Node, data: List<String>) {
+    private fun populate(parent: GraphNode) {
+        val children = parent.data?.children!!
 
-    }
+        for (i in 0 until children.size) {
+            val direction = if (parent.depth == -1) {
+                Polar(i.toDouble() / children.size * 360.0 + Double.uniform(-20.0, 20.0), 1.0).cartesian
+            } else {
+                val dir = (parent.position - parent.parent!!.position).normalized * 50.0
+                dir.normalized.rotate(10.0 * (i - (children.size / 2.0)))
+            }
 
-    fun addChild(parent: Node, data: String, userDirection: Vector2? = null): Node {
+            val position = parent.position + direction * 100.0
+            val child = GraphNode(
+                position,
+                parent.depth + 1,
+                20.0,
+                direction,
+                children[i],
+                parent
+            )
 
-        var direction = userDirection ?: (parent.position - (parent.parent?.position ?: origin))
+            nodes.add(child)
+            edges.add(GraphEdge(parent, child, 60.0))
 
-        val newPosition = parent.position + direction.normalized * 100.0
-        val influenceRadius = 10.0 //5.0 + (5.0 * (5 - (parent.depth + 1))).pow(2)
+            parent.children.add(child)
 
-        val child = Node(
-            newPosition,
-            parent.depth + 1,
-            influenceRadius,
-            label = data,
-            parent = parent
-        )
+            populate(child)
+        }
 
-        nodes.add(child)
-        edges.add(Edge(parent, child, 60.0))
-
-        parent.children.add(child)
-
-        return child
     }
 
     val iterations = 5
@@ -59,8 +66,17 @@ class Graph(val origin: Vector2) {
     val stiffness = 1.0
     val acceleration = 0.1
 
+    val intersections = mutableListOf<SegmentIntersection>()
+
+    fun rotate(amt: Double) {
+        for (node in nodes) {
+            node.nextPosition = node.nextPosition.rotate(amt, origin)
+            node.direction = node.direction.rotate(amt)
+        }
+    }
 
     fun update(dt: Double = 1.0 / iterations) {
+        intersections.clear()
 
         repeat(iterations) {
             kd = buildKDTree(nodes, 2, ::nodeMapper)
@@ -88,7 +104,7 @@ class Graph(val origin: Vector2) {
                     }
                 }
 
-                val attraction = if (node.depth == -1) 0.6 else 0.001
+                val attraction = if (node.depth == -1) 1.6 else 0.0
                 node.nextPosition += (origin - node.position) * attraction * dt
             }
 
@@ -105,6 +121,8 @@ class Graph(val origin: Vector2) {
 
 
             for (node in nodes) {
+                node.nextPosition += node.direction * 0.2
+
                 val velocity = (node.position - node.oldPosition) * acceleration
                 node.oldPosition = node.position - velocity * damping * (1.0 - dt)
                 node.position = node.nextPosition + velocity * damping * dt
@@ -125,6 +143,11 @@ class Graph(val origin: Vector2) {
 
         for (edge in edges) {
             edge.draw(drawer)
+        }
+
+        for (i in intersections) {
+            drawer.fill = ColorRGBa.YELLOW
+            drawer.circle(i.position, 3.0)
         }
     }
 
