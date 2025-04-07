@@ -20,6 +20,9 @@ class GraphNode(
     var smoothPosition = position
     var velocity = Vector2.ZERO
 
+    val isLeaf: Boolean
+        get() = children.isEmpty()
+
     fun draw(drawer: Drawer) {
         drawer.fill = ColorRGBa.WHITE
         drawer.circle(position, 3.0)
@@ -29,8 +32,12 @@ class GraphNode(
         }
 
         drawer.fill = null
-        drawer.stroke = if (depth == -1) ColorRGBa.BLUE else ColorRGBa.TRANSPARENT
+        drawer.stroke = if (depth == -1) ColorRGBa.BLUE else ColorRGBa.RED
         drawer.circle(smoothPosition, influenceRadius)
+
+        drawer.stroke = ColorRGBa.YELLOW
+        drawer.lineSegment(smoothPosition, smoothPosition + direction * 10.0)
+
     }
 
 }

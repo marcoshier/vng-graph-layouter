@@ -27,8 +27,8 @@ class GraphEdge(
         drawer.stroke = ColorRGBa.WHITE
         drawer.segment(segment)
 
-        val t = (System.currentTimeMillis() - initTime) / 500.0
-        targetLength = sin(t + 1.5 * (a.depth + 1)) * 50.0 + 60.0
+        val t = (System.currentTimeMillis() - initTime) / 2500.0
+     //   targetLength = sin(t + 1.5 * (a.depth + 1)) * 50.0 + 60.0
     }
 
 }

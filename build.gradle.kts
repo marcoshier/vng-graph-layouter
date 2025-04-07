@@ -111,10 +111,10 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
-repositories {
-    mavenCentral()
-    mavenLocal()
-}
+//repositories {
+//    mavenCentral()
+//    mavenLocal()
+//}
 
 dependencies {
 
@@ -131,6 +131,24 @@ dependencies {
 //    implementation(libs.orsl.extension.pbr)
 //    implementation(libs.orsl.extension.raymarching)
 //    implementation(libs.orsl.extension.sdf)
+
+    /* PGS dependencies */
+
+    implementation("com.github.openjump-gis:OpenJUMP:-SNAPSHOT") {
+        exclude("javax.media")
+        exclude("it.geosolutions.imageio-ext")
+    }
+
+
+    implementation("com.github.micycle1:JMedialAxis:5207bec2f2")
+
+    implementation("com.github.edwinRNDR:PGS:-SNAPSHOT") {
+        exclude(group = "quil")
+        exclude(group = "org.openjump")
+        exclude(group = "org.jogamp.jogl")
+        exclude(group = "org.jogamp.gluegen")
+    }
+
 
     implementation(libs.kotlinx.serialization.core)
     implementation(libs.kotlinx.serialization.json)
