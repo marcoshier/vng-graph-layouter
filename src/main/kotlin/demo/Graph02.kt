@@ -1,4 +1,6 @@
-import data.ProjectDescription
+package demo
+
+import Graph
 import kotlinx.serialization.json.Json
 import org.openrndr.application
 import org.openrndr.draw.isolated
@@ -36,8 +38,6 @@ fun main() {
             }
 
             val grid = drawer.bounds.grid(2, 2).flatten()
-
-            val branches =
 
             extend {
 

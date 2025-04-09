@@ -1,14 +1,10 @@
-import data.ProjectDescription
+package demo
+
+import Graph
 import kotlinx.serialization.json.Json
 import org.openrndr.application
-import org.openrndr.color.ColorRGBa
 import org.openrndr.extra.camera.Camera2D
-import org.openrndr.extra.color.spaces.ColorOKHSLa
-import org.openrndr.extra.color.tools.shiftHue
-import org.openrndr.extra.noise.uniform
-import org.openrndr.shape.ShapeContour
 import java.io.File
-import kotlin.random.Random
 
 fun main() {
     application {
@@ -18,8 +14,6 @@ fun main() {
         }
 
         program {
-
-          //  extend(ScreenRecorder())
 
             extend(Camera2D())
 

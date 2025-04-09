@@ -1,4 +1,3 @@
-import data.ProjectDescription
 import lib.PVector
 import micycle.pgs.PGS_PointSet.weightedMedian
 import micycle.pgs.commons.FarthestPointPair
@@ -18,6 +17,7 @@ import org.openrndr.shape.ContourIntersection
 import org.openrndr.shape.LineSegment
 import org.openrndr.shape.Segment2D
 import kotlin.collections.get
+import kotlin.reflect.full.memberProperties
 
 /**
     XPBD-based Graph Layouter
@@ -32,7 +32,7 @@ class Graph(val origin: Vector2) {
 
     var circleBounds = Circle(origin, 10E4)
 
-    fun init(data: ProjectDescription) {
+    fun init(data: Any) {
         val root = GraphNode(origin, data = data)
 
         nodes.add(root)
@@ -46,7 +46,9 @@ class Graph(val origin: Vector2) {
     }
 
     private fun populate(parent: GraphNode) {
-        val children = parent.data?.children!!
+        if (parent.data == null) return
+        val childrenProp = parent.data!!::class.memberProperties.firstOrNull { it.name == "children" } as? kotlin.reflect.KProperty1<Any, *>
+        val children = childrenProp?.get(parent.data!!) as List<*>
 
         for (i in 0 until children.size) {
             val direction = if (parent.depth == -1) {

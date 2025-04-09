@@ -4,8 +4,8 @@ import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
-group = "org.openrndr.template"
-version = "1.0.0"
+group = "org.marcoshier"
+version = "1.0-SNAPSHOT"
 
 val applicationMainClass = "TemplateProgramKt"
 
@@ -118,6 +118,8 @@ plugins {
 //}
 
 dependencies {
+
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
 
 //    implementation(libs.jsoup)
 //    implementation(libs.csv)

@@ -1,4 +1,3 @@
-import data.ProjectDescription
 import org.openrndr.color.ColorRGBa
 import org.openrndr.draw.Drawer
 import org.openrndr.math.Vector2
@@ -8,7 +7,7 @@ class GraphNode(
     val depth: Int = -1,
     var influenceRadius: Double = 10.0,
     var direction: Vector2 = Vector2.ZERO,
-    var data: ProjectDescription? = null,
+    var data: Any? = null,
     val parent: GraphNode? = null,
     val children: MutableList<GraphNode> = mutableListOf()
 ) {

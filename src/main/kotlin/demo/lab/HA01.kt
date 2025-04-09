@@ -1,4 +1,4 @@
-package lab
+package demo.lab
 
 import lib.assignPoints
 import org.openrndr.application

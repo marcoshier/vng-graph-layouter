@@ -1,4 +1,4 @@
-package lab
+package demo.lab
 
 import lib.Vector2
 import lib.assignPoints
