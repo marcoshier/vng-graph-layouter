@@ -1,15 +1,11 @@
-import kotlinx.serialization.Serializable
+import data.ProjectDescription
 import kotlinx.serialization.json.Json
-import lib.Graph
-import lib.GraphNode
 import org.openrndr.application
 import org.openrndr.draw.isolated
 import org.openrndr.extra.camera.Camera2D
 import org.openrndr.extra.noise.uniform
 import org.openrndr.extra.shapes.primitives.grid
-import org.openrndr.ffmpeg.ScreenRecorder
 import java.io.File
-import kotlin.math.sin
 
 fun main() {
     application {

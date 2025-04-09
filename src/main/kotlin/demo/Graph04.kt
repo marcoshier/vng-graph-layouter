@@ -1,20 +1,14 @@
-import kotlinx.serialization.Serializable
+import data.ProjectDescription
 import kotlinx.serialization.json.Json
-import lib.Graph
-import lib.GraphNode
 import org.openrndr.application
+import org.openrndr.color.ColorRGBa
 import org.openrndr.extra.camera.Camera2D
-import org.openrndr.ffmpeg.ScreenRecorder
+import org.openrndr.extra.color.spaces.ColorOKHSLa
+import org.openrndr.extra.color.tools.shiftHue
+import org.openrndr.extra.noise.uniform
+import org.openrndr.shape.ShapeContour
 import java.io.File
-
-@Serializable
-class ProjectDescription(
-    val text: String,
-    val evaluations: Map<String, Int?>,
-    val observations: Map<String, String>,
-    val dimension: String? = null,
-    val children: MutableList<ProjectDescription> = mutableListOf()
-)
+import kotlin.random.Random
 
 fun main() {
     application {
@@ -39,8 +33,7 @@ fun main() {
             extend {
 
                 graph.update()
-                graph.draw(drawer)
-
+                //graph.draw(drawer)
             }
         }
     }

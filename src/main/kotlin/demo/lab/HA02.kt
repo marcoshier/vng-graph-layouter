@@ -1,15 +1,13 @@
 package lab
 
 import lib.Vector2
+import lib.assignPoints
 import micycle.pgs.PGS_PointSet.phyllotaxis
 import org.openrndr.application
 import org.openrndr.color.ColorRGBa
 import org.openrndr.extra.color.presets.LIGHT_GRAY
 import org.openrndr.extra.noise.shapes.uniform
-import org.openrndr.extra.shapes.hobbycurve.hobbyCurve
-import org.openrndr.extra.shapes.primitives.grid
 import org.openrndr.ffmpeg.ScreenRecorder
-import processing.core.PVector
 
 fun main() {
     application {

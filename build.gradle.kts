@@ -109,6 +109,7 @@ plugins {
     alias(libs.plugins.gitarchive.tomarkdown).apply(false)
     alias(libs.plugins.versions)
     alias(libs.plugins.kotlin.serialization)
+    `maven-publish`
 }
 
 //repositories {
@@ -391,6 +392,14 @@ if (properties["openrndr.tasks"] == "true") {
                     """.trimIndent()
                 )
             }
+        }
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
         }
     }
 }

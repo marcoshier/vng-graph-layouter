@@ -1,4 +1,4 @@
-package lab
+package lib
 
 import org.openrndr.math.Vector2
 import kotlin.math.max

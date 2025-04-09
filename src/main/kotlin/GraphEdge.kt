@@ -1,9 +1,6 @@
-package lib
-
 import org.openrndr.color.ColorRGBa
 import org.openrndr.draw.Drawer
 import org.openrndr.shape.Segment2D
-import kotlin.math.sin
 
 class GraphEdge(
     val a: GraphNode,

@@ -1,14 +1,11 @@
+import data.ProjectDescription
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import lib.Graph
 import org.openrndr.application
-import org.openrndr.color.ColorRGBa
 import org.openrndr.extra.camera.Camera2D
-import org.openrndr.extra.color.spaces.ColorOKHSLa
-import org.openrndr.extra.color.tools.shiftHue
-import org.openrndr.extra.noise.uniform
-import org.openrndr.shape.ShapeContour
+import org.openrndr.ffmpeg.ScreenRecorder
 import java.io.File
-import kotlin.random.Random
+
 
 fun main() {
     application {
@@ -33,7 +30,8 @@ fun main() {
             extend {
 
                 graph.update()
-                //graph.draw(drawer)
+                graph.draw(drawer)
+
             }
         }
     }

@@ -1,6 +1,5 @@
-package lib
-
-import ProjectDescription
+import data.ProjectDescription
+import lib.PVector
 import micycle.pgs.PGS_PointSet.weightedMedian
 import micycle.pgs.commons.FarthestPointPair
 import org.openrndr.color.ColorRGBa
@@ -10,6 +9,7 @@ import org.openrndr.extra.color.presets.PURPLE
 import org.openrndr.extra.color.presets.TURQUOISE
 import org.openrndr.extra.kdtree.buildKDTree
 import org.openrndr.extra.noise.uniform
+import org.openrndr.extra.parameters.listParameters
 import org.openrndr.math.Polar
 import org.openrndr.math.Vector2
 import org.openrndr.math.smoothstep
@@ -17,8 +17,7 @@ import org.openrndr.shape.Circle
 import org.openrndr.shape.ContourIntersection
 import org.openrndr.shape.LineSegment
 import org.openrndr.shape.Segment2D
-import kotlin.math.pow
-import kotlin.math.sin
+import kotlin.collections.get
 
 /**
     XPBD-based Graph Layouter
@@ -40,9 +39,9 @@ class Graph(val origin: Vector2) {
         kd = buildKDTree(nodes, 2, ::nodeMapper)
 
         populate(root)
-        repeat(iterations * 60) {
-            update()
-        }
+//        repeat(iterations * 60) {
+//            update()
+//        }
 
     }
 
@@ -54,7 +53,7 @@ class Graph(val origin: Vector2) {
                 Polar(i.toDouble() / children.size * 360.0 + Double.uniform(-20.0, 20.0), 1.0).cartesian
             } else {
                 val dir = (parent.position - parent.parent!!.position).normalized * 50.0
-                dir.normalized.rotate(10.0 * (i - (children.size / 2.0)))
+                dir.normalized.rotate((5.0 * (i - (children.size / 2.0))) * parent.children.size * 2.0)
             }
 
             val position = parent.position + direction * 100.0
@@ -82,8 +81,8 @@ class Graph(val origin: Vector2) {
     fun findCircleBounds(): Circle {
         val ppositions = nodes.map { PVector(it.position) }
         val median = weightedMedian(ppositions)
-        val centroid = Vector2(median)
-        val radius = (centroid - Vector2(FarthestPointPair(ppositions).either())).length
+        val centroid = lib.Vector2(median)
+        val radius = (centroid - lib.Vector2(FarthestPointPair(ppositions).either())).length
 
         return Circle(centroid, radius)
     }
