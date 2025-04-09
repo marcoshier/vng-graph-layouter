@@ -98,7 +98,6 @@ class Graph(val origin: Vector2) {
 
         if (node.isLeaf) {
             paths.add(listOf(node))
-            return paths
         }
 
         for (child in node.children) {
