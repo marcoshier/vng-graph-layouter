@@ -43,7 +43,7 @@ fun main() {
                 val graph = Graph(drawer.bounds.center)
                 graph.apply {
                     init(it.first())
-                    rotate(Double.uniform(0.0, 360.0))
+                    //rotate(Double.uniform(0.0, 360.0))
                 }
             }
 

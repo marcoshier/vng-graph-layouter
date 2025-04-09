@@ -15,7 +15,6 @@ class GraphNode(
     var oldPosition = position
     var nextPosition = position
     var smoothPosition = position
-    var velocity = Vector2.ZERO
 
     val isLeaf: Boolean
         get() = children.isEmpty()

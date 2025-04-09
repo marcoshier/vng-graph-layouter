@@ -28,9 +28,10 @@ class Graph(val origin: Vector2) {
     val nodes = mutableListOf<GraphNode>()
     val edges = mutableListOf<GraphEdge>()
 
-    var kd = buildKDTree(nodes, 2, ::nodeMapper)
+    private var kd = buildKDTree(nodes, 2, ::nodeMapper)
 
     var circleBounds = Circle(origin, 10E4)
+    var branches = listOf<List<GraphNode>>()
 
     fun init(data: Any) {
         val root = GraphNode(origin, data = data)
@@ -39,10 +40,8 @@ class Graph(val origin: Vector2) {
         kd = buildKDTree(nodes, 2, ::nodeMapper)
 
         populate(root)
-//        repeat(iterations * 60) {
-//            update()
-//        }
 
+        branches = findBranches()
     }
 
     private fun populate(parent: GraphNode) {
@@ -84,7 +83,28 @@ class Graph(val origin: Vector2) {
 
     }
 
-    fun findCircleBounds(): Circle {
+    private fun findBranches(): List<List<GraphNode>> {
+        val result = mutableListOf<List<GraphNode>>()
+        val leaves = nodes.filter { it.isLeaf }
+        for (leaf in leaves) {
+            val stack = mutableListOf<GraphNode>()
+
+            fun visit(node: GraphNode) {
+                stack.add(node)
+                if (node.parent == null)
+                    return
+
+                visit(node.parent)
+            }
+
+            visit(leaf)
+            result.add(stack)
+        }
+
+        return result
+    }
+
+    private fun findCircleBounds(): Circle {
         val ppositions = nodes.map { PVector(it.position) }
         val median = weightedMedian(ppositions)
         val centroid = lib.Vector2(median)
@@ -93,38 +113,11 @@ class Graph(val origin: Vector2) {
         return Circle(centroid, radius)
     }
 
-    fun branches(node: GraphNode = nodes.first()): List<List<GraphNode>> {
-        val paths = mutableListOf<List<GraphNode>>()
-
-        if (node.isLeaf) {
-            paths.add(listOf(node))
-        }
-
-        for (child in node.children) {
-            for (childPath in branches(child)) {
-                val fullPath = mutableListOf<GraphNode>()
-                fullPath.add(node)
-                fullPath.addAll(childPath)
-                paths.add(fullPath)
-            }
-        }
-
-        return paths
-    }
 
     val iterations = 5
     val damping = 0.999
     val stiffness = 1.0
     val acceleration = 0.1
-
-    var intersections = mutableListOf<ContourIntersection>()
-
-    fun rotate(amt: Double) {
-        for (node in nodes) {
-            node.nextPosition = node.nextPosition.rotate(amt, origin)
-            node.direction = node.direction.rotate(amt)
-        }
-    }
 
     fun update(dt: Double = 1.0 / iterations) {
         repeat(iterations) {
