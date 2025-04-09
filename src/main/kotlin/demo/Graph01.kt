@@ -7,14 +7,6 @@ import org.openrndr.application
 import org.openrndr.extra.camera.Camera2D
 import java.io.File
 
-@Serializable
-class ProjectDescription(
-    val text: String,
-    val evaluations: Map<String, Int?>,
-    val observations: Map<String, String>,
-    val dimension: String? = null,
-    val children: MutableList<ProjectDescription> = mutableListOf()
-)
 
 fun main() {
     application {
@@ -22,6 +14,15 @@ fun main() {
             width = 1280
             height = 1280
         }
+
+        @Serializable
+        class ProjectDescription(
+            val text: String,
+            val evaluations: Map<String, Int?>,
+            val observations: Map<String, String>,
+            val dimension: String? = null,
+            val children: MutableList<ProjectDescription> = mutableListOf()
+        )
 
         program {
 

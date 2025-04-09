@@ -47,7 +47,11 @@ class Graph(val origin: Vector2) {
 
     private fun populate(parent: GraphNode) {
         if (parent.data == null) return
-        val childrenProp = parent.data!!::class.memberProperties.firstOrNull { it.name == "children" } as? kotlin.reflect.KProperty1<Any, *>
+
+        val childrenProp = parent.data!!::class.memberProperties.firstOrNull {
+            it.name == "children"
+        } as? kotlin.reflect.KProperty1<Any, *>
+
         val children = childrenProp?.get(parent.data!!) as List<*>
 
         for (i in 0 until children.size) {
