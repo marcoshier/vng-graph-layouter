@@ -4,7 +4,10 @@ import Graph
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.openrndr.application
+import org.openrndr.color.ColorRGBa
 import org.openrndr.extra.camera.Camera2D
+import org.openrndr.extra.shapes.splines.catmullRom
+import org.openrndr.extra.shapes.splines.toContour
 import java.io.File
 fun main() {
     application {
@@ -39,8 +42,17 @@ fun main() {
 
             extend {
 
-               // graph.update()
-                graph.draw(drawer)
+                graph.update()
+                //graph.draw(drawer)
+
+                drawer.stroke = ColorRGBa.YELLOW
+                for (b in graph.branches) {
+                    val catmullRom = b.map { it.smoothPosition }.catmullRom(closed = false)
+                    val smoothContour = catmullRom.toContour()
+
+                    drawer.contour(smoothContour)
+                }
+
             }
         }
     }

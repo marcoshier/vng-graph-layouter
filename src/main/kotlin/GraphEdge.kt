@@ -12,10 +12,10 @@ class GraphEdge(
         get() = a.depth
 
     val length: Double
-        get() = (a.position - b.position).length
+        get() = (a.smoothPosition - b.smoothPosition).length
 
     val segment: Segment2D
-        get() = Segment2D(a.position, b.position)
+        get() = Segment2D(a.smoothPosition, b.smoothPosition)
 
 
     private val initTime = System.currentTimeMillis()

@@ -6,11 +6,13 @@ class GraphNode(
     var position: Vector2,
     val depth: Int = -1,
     var influenceRadius: Double = 10.0,
-    var direction: Vector2 = Vector2.ZERO,
+    var initialDirection: Vector2 = Vector2.ZERO,
     var data: Any? = null,
     val parent: GraphNode? = null,
     val children: MutableList<GraphNode> = mutableListOf()
 ) {
+
+    var id = 0
 
     var oldPosition = position
     var nextPosition = position
@@ -32,7 +34,7 @@ class GraphNode(
         drawer.circle(smoothPosition, influenceRadius)
 
         drawer.stroke = ColorRGBa.YELLOW
-        drawer.lineSegment(smoothPosition, smoothPosition + direction * 10.0)
+        drawer.lineSegment(smoothPosition, smoothPosition + initialDirection * 10.0)
 
     }
 

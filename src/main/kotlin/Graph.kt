@@ -8,15 +8,14 @@ import org.openrndr.extra.color.presets.PURPLE
 import org.openrndr.extra.color.presets.TURQUOISE
 import org.openrndr.extra.kdtree.buildKDTree
 import org.openrndr.extra.noise.uniform
-import org.openrndr.extra.parameters.listParameters
 import org.openrndr.math.Polar
 import org.openrndr.math.Vector2
 import org.openrndr.math.smoothstep
 import org.openrndr.shape.Circle
-import org.openrndr.shape.ContourIntersection
 import org.openrndr.shape.LineSegment
 import org.openrndr.shape.Segment2D
-import kotlin.collections.get
+import org.openrndr.shape.intersections
+import kotlin.math.max
 import kotlin.reflect.full.memberProperties
 
 /**
@@ -33,6 +32,11 @@ class Graph(val origin: Vector2) {
     var circleBounds = Circle(origin, 10E4)
     var branches = listOf<List<GraphNode>>()
 
+    var iterations = 5
+    val damping = 0.999
+    val stiffness = 1.0
+    val acceleration = 0.1
+
     fun init(data: Any) {
         val root = GraphNode(origin, data = data)
 
@@ -41,8 +45,25 @@ class Graph(val origin: Vector2) {
 
         populate(root)
 
+        repeat(15) { update() }
+
+        for (node in nodes ){
+            node.influenceRadius = 20.0
+        }
+
+        for (edge in edges) {
+            if (edge.depth == -1) edge.targetLength = 150.0
+            else {
+                edge.targetLength = 20.0
+            }
+        }
+
+
         branches = findBranches()
     }
+
+    private var nodeId = 0
+    private var maxDepth = -1
 
     private fun populate(parent: GraphNode) {
         if (parent.data == null) return
@@ -58,20 +79,52 @@ class Graph(val origin: Vector2) {
                 Polar(i.toDouble() / children.size * 360.0 + Double.uniform(-20.0, 20.0), 1.0).cartesian
             } else {
                 val dir = (parent.position - parent.parent!!.position).normalized * 50.0
-                dir.normalized.rotate((5.0 * (i - (children.size / 2.0))) * parent.children.size * 2.0)
+                dir.normalized.rotate((10.0 * (i - (children.size / 2.0))) * parent.children.size * 2.0)
             }
 
-            val position = parent.position + direction * 100.0
+            val influenceRadius = 10.0
+            var distance = 0.0
+
+            fun computeNextPosition(): Vector2 {
+                var hit = false
+
+                fun intersects(): Boolean {
+                    val newPos = parent.position + direction * distance
+                    val intersections = edges
+                        .filter { it.a != parent && it.b != parent }
+                        .map { it.segment }
+                        .any { it.intersections(Segment2D(parent.position, newPos)).isNotEmpty() }
+
+                    return intersections
+                }
+
+                while (distance < 50.0 && !hit) {
+                    distance += 5.0
+
+                    if (intersects()) {
+                        hit = true
+                    }
+                }
+
+                return parent.position + direction * distance
+            }
+
+            val position = computeNextPosition()
             val child = GraphNode(
                 position,
                 parent.depth + 1,
-                20.0,
+                distance,
                 direction,
                 children[i],
                 parent
             )
 
-            val edge = GraphEdge(parent, child, 10.0)
+            maxDepth = max(maxDepth, child.depth)
+
+            nodeId++
+            child.id = nodeId
+
+            val edge = GraphEdge(parent, child, distance * 1.1)
 
             nodes.add(child)
             edges.add(edge)
@@ -114,16 +167,20 @@ class Graph(val origin: Vector2) {
     }
 
 
-    val iterations = 5
-    val damping = 0.999
-    val stiffness = 1.0
-    val acceleration = 0.1
-
     fun update(dt: Double = 1.0 / iterations) {
         repeat(iterations) {
             kd = buildKDTree(nodes, 2, ::nodeMapper)
 
             for (node in nodes) {
+                val distanceToCenter = node.position.distanceTo(origin).coerceAtMost(500.0) / 500.0
+                if (node.isLeaf) {
+                    node.nextPosition -= (origin - node.position) * 0.008 * (1.0 - distanceToCenter) * dt
+                    node.nextPosition += node.initialDirection.normalized * 0.05 * dt
+                }
+
+
+               //
+
                 val inRange = kd.findAllInRadius(node, node.influenceRadius * 2.0)
 
                 for (other in inRange) {
@@ -135,25 +192,25 @@ class Graph(val origin: Vector2) {
 
                     if (distance > 0.0) {
 
-                        /*val repulsion = direction.normalized * dt * 1.5
+                        val repulsion = direction.normalized * dt * 1.5
                         node.nextPosition -= repulsion
-                        other.nextPosition += repulsion*/
+                        other.nextPosition += repulsion
 
-                        if (distance < radiiSum) {
+                        if (distance < radiiSum  && node.depth != -1) {
                             val collision = direction * ((distance - radiiSum) / distance * 0.5)
                             node.nextPosition += collision * (node.influenceRadius * 0.01)
                         }
                     }
                 }
 
-                val attraction = if (node.depth == -1) 1.6 else 0.0
-                node.nextPosition += (origin - node.position) * attraction * dt
+                if (node.depth == -1) {
+                    node.nextPosition += (origin - node.position) * 1.5 * dt
+                }
             }
 
 
              for (edge in edges) {
                  val diff = edge.a.position - edge.b.position
-
                  if (diff.length > 0.0) {
                      val force = (diff * ((diff.length - edge.targetLength) / diff.length * dt)) * stiffness
                      edge.a.nextPosition -= force
@@ -163,6 +220,7 @@ class Graph(val origin: Vector2) {
 
 
             for (node in nodes) {
+
 
                 val velocity = (node.position - node.oldPosition) * acceleration
                 node.oldPosition = node.position - velocity * damping * (1.0 - dt)
