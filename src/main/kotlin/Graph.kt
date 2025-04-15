@@ -27,6 +27,8 @@ class Graph(val origin: Vector2) {
     val nodes = mutableListOf<GraphNode>()
     val edges = mutableListOf<GraphEdge>()
 
+    val nodesById = mutableMapOf<Int, GraphNode>()
+
     private var kd = buildKDTree(nodes, 2, ::nodeMapper)
 
     var circleBounds = Circle(origin, 10E4)
@@ -41,6 +43,8 @@ class Graph(val origin: Vector2) {
         val root = GraphNode(origin, data = data)
 
         nodes.add(root)
+        nodesById[root.id] = root
+
         kd = buildKDTree(nodes, 2, ::nodeMapper)
 
         populate(root)
@@ -127,6 +131,7 @@ class Graph(val origin: Vector2) {
             val edge = GraphEdge(parent, child, distance * 1.1)
 
             nodes.add(child)
+            nodesById[child.id] = child
             edges.add(edge)
 
             parent.children.add(child)
