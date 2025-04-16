@@ -2,7 +2,7 @@ import org.openrndr.color.ColorRGBa
 import org.openrndr.draw.Drawer
 import org.openrndr.math.Vector2
 
-class GraphNode(
+data class GraphNode(
     var position: Vector2,
     val depth: Int = -1,
     var influenceRadius: Double = 10.0,
