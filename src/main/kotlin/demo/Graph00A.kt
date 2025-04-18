@@ -42,7 +42,7 @@ fun main() {
             extend(Camera2D())
 
             val projects = Json.decodeFromString<List<ProjectDescription>>(
-                File("data/projects-02.json").readText()
+                File("data/projects-05.json").readText()
             )
 
             val graph0 = Graph(drawer.bounds.sub(0.0, 0.0, 0.5, 1.0).center)

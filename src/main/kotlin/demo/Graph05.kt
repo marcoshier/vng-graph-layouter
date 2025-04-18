@@ -54,10 +54,10 @@ fun main() {
         )
         program {
 
-            //   extend(ScreenRecorder())
+            extend(ScreenRecorder())
 
             val projects = Json.decodeFromString<List<ProjectDescription>>(
-                File("data/projects-02.json").readText()
+                File("data/projects-05.json").readText()
             )
 
             val colorMap = listOf(
@@ -190,12 +190,11 @@ fun main() {
 
             }
 
-            val vbs = graph.edges.associate {
-                it.b.id to vertexBuffer(vertexFormat {
-                    position(3)
-                    color(4)
-                }, 500)
-            }
+            val vb = vertexBuffer(vertexFormat {
+                position(3)
+                color(4)
+            }, 500 * graph.edges.size)
+
 
             val camera = extend(Camera2D())
 
@@ -245,22 +244,24 @@ fun main() {
                                 if (node.parent == null || drawnBranches[node.id] != null) continue
 
                                 val t0 = smoothContour.nearest(node.smoothPosition).contourT
-                                val t1 = smoothContour.nearest(node.parent!!.smoothPosition).contourT
+                                val t1 = smoothContour.nearest(node.parent.smoothPosition).contourT
 
                                 val trim = smoothContour.sub(t0, t1)
 
                                 drawer.isolated {
                                     // drawer.defaults()
 
-                                    drawer.shadeStyle = shadeStyle {
+                                   /* drawer.shadeStyle = shadeStyle {
                                         fragmentTransform = "x_fill = va_color;"
-                                    }
+                                    }*/
 
                                     val contour = trim.sub(0.0, state.t * 0.98)
 
+                                    drawer.contour(contour)
+
                                     // https://openrndr.discourse.group/t/drawing-per-vertex-colored-meshes-and-variable-thickness-lines/266/3
 
-                                    vbs[node.id]!!.put {
+                                   /* vbs[node.id]!!.put {
                                         for (i in 0 until 250) {
                                             val t = i / 249.0
                                             val targetColor = data.dimension?.let { colorMap[it] } ?: run { ColorRGBa.WHITE }
@@ -276,7 +277,7 @@ fun main() {
                                     }
 
                                     drawer.vertexBuffer(vbs[node.id]!!, DrawPrimitive.TRIANGLE_STRIP)
-                                    drawer.shadeStyle = null
+                                    drawer.shadeStyle = null*/
                                 }
 
 

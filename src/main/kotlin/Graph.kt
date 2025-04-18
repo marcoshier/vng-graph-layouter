@@ -42,7 +42,7 @@ class Graph(val origin: Vector2) {
 
         populate(root)
 
-        repeat(15) { update() }
+       // repeat(15) { update() }
 
 
         for (node in nodes ){
@@ -50,19 +50,19 @@ class Graph(val origin: Vector2) {
         }
 
         for (edge in edges) {
-            edge.targetLength = when(edge.depth) {
-                -1 -> 30.0
-                0 -> 50.0
-                1 -> 70.0
-                2 -> 45.0
-                3 -> 30.0
-                4 -> 15.0
-                else -> 7.0
-            }
+            edge.targetLength = 50.0
+            // when(edge.depth) {
+            //                -1 -> 30.0
+            //                0 -> 50.0
+            //                1 -> 70.0
+            //                2 -> 45.0
+            //                3 -> 30.0
+            //                4 -> 15.0
+            //                else -> 7.0
+            //            }
         }
 
-
-        update()
+//   update()
 
         branches = findBranches()
     }
@@ -84,7 +84,7 @@ class Graph(val origin: Vector2) {
                 Polar(i.toDouble() / children.size * 360.0 + Double.uniform(-5.0, 5.0), 1.0).cartesian
             } else {
                 val dir = (parent.position - parent.parent!!.position).normalized * 50.0
-                dir.normalized.rotate((10.0 * (i - (children.size / 2.0))) * parent.children.size * 2.0)
+                dir.normalized.rotate((1.0 * (i - (children.size / 2.0))) * parent.children.size * 2.0)
             }
 
             val influenceRadius = 10.0
@@ -104,7 +104,7 @@ class Graph(val origin: Vector2) {
                 }
 
                 while (distance < 50.0 && !hit) {
-                    distance += 5.0
+                    distance += 2.0
 
                     if (intersects()) {
                         hit = true
