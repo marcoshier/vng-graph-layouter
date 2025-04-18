@@ -9,7 +9,7 @@ import kotlin.math.max
  * between two sets of points to minimize the total distance/cost.
  *
  * lifted from https://github.com/KevinStern/software-and-algorithms/blob/master/src/main/java/blogspot/software_and_algorithms/stern_library/optimization/HungarianAlgorithm.java
- * translated to Kotlin for Vector2 by Claude
+ * translated to Kotlin for Vector2 by Claude 3.7
  */
 
 class HungarianAlgorithm(pointsA: List<Vector2>, pointsB: List<Vector2>) {
@@ -273,8 +273,9 @@ class HungarianAlgorithm(pointsA: List<Vector2>, pointsB: List<Vector2>) {
 }
 
 /**
- * Example usage with OPENRNDR Vector2 points
+ * Vector2 assignment function
  */
+
 fun assignPoints(pointsA: List<Vector2>, pointsB: List<Vector2>): List<Pair<Vector2, Vector2?>> {
     val algorithm = HungarianAlgorithm(pointsA, pointsB)
     val assignments = algorithm.execute()

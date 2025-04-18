@@ -21,23 +21,6 @@ data class GraphNode(
     val isLeaf: Boolean
         get() = children.isEmpty()
 
-    fun draw(drawer: Drawer) {
-        drawer.fill = ColorRGBa.WHITE
-        drawer.circle(position, 3.0)
-
-        data?.let {
-           // drawer.text("${it.dimension}", position)
-        }
-
-        drawer.fill = null
-        drawer.stroke = if (depth == -1) ColorRGBa.BLUE else ColorRGBa.RED
-        drawer.circle(smoothPosition, influenceRadius)
-
-        drawer.stroke = ColorRGBa.YELLOW
-        drawer.lineSegment(smoothPosition, smoothPosition + initialDirection * 10.0)
-
-    }
-
 }
 
 

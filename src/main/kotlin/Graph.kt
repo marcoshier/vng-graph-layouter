@@ -1,18 +1,11 @@
 import lib.PVector
 import micycle.pgs.PGS_PointSet.weightedMedian
 import micycle.pgs.commons.FarthestPointPair
-import org.openrndr.color.ColorRGBa
-import org.openrndr.draw.Drawer
-import org.openrndr.draw.defaultFontMap
-import org.openrndr.extra.color.presets.PURPLE
-import org.openrndr.extra.color.presets.TURQUOISE
 import org.openrndr.extra.kdtree.buildKDTree
 import org.openrndr.extra.noise.uniform
 import org.openrndr.math.Polar
 import org.openrndr.math.Vector2
-import org.openrndr.math.smoothstep
 import org.openrndr.shape.Circle
-import org.openrndr.shape.LineSegment
 import org.openrndr.shape.Segment2D
 import org.openrndr.shape.intersections
 import kotlin.math.max
@@ -51,23 +44,31 @@ class Graph(val origin: Vector2) {
 
         repeat(15) { update() }
 
+
         for (node in nodes ){
             node.influenceRadius = 20.0
         }
 
         for (edge in edges) {
-            if (edge.depth == -1) edge.targetLength = 150.0
-            else {
-                edge.targetLength = 20.0
+            edge.targetLength = when(edge.depth) {
+                -1 -> 30.0
+                0 -> 50.0
+                1 -> 70.0
+                2 -> 45.0
+                3 -> 30.0
+                4 -> 15.0
+                else -> 7.0
             }
         }
 
+
+        update()
 
         branches = findBranches()
     }
 
     private var nodeId = 0
-    private var maxDepth = -1
+    var maxDepth = -1
 
     private fun populate(parent: GraphNode) {
         if (parent.data == null) return
@@ -80,7 +81,7 @@ class Graph(val origin: Vector2) {
 
         for (i in 0 until children.size) {
             val direction = if (parent.depth == -1) {
-                Polar(i.toDouble() / children.size * 360.0 + Double.uniform(-20.0, 20.0), 1.0).cartesian
+                Polar(i.toDouble() / children.size * 360.0 + Double.uniform(-5.0, 5.0), 1.0).cartesian
             } else {
                 val dir = (parent.position - parent.parent!!.position).normalized * 50.0
                 dir.normalized.rotate((10.0 * (i - (children.size / 2.0))) * parent.children.size * 2.0)
@@ -172,6 +173,16 @@ class Graph(val origin: Vector2) {
     }
 
 
+    private var displacer: (GraphNode) -> Vector2 = { Vector2.ZERO }
+
+    fun displace(v: Vector2) {
+        displacer = { v }
+    }
+
+    fun displace(f: (GraphNode) -> Vector2) {
+        displacer = f
+    }
+
     fun update(dt: Double = 1.0 / iterations) {
         repeat(iterations) {
             kd = buildKDTree(nodes, 2, ::nodeMapper)
@@ -180,9 +191,9 @@ class Graph(val origin: Vector2) {
                 val distanceToCenter = node.position.distanceTo(origin).coerceAtMost(500.0) / 500.0
                 if (node.isLeaf) {
                     node.nextPosition -= (origin - node.position) * 0.008 * (1.0 - distanceToCenter) * dt
-                    node.nextPosition += node.initialDirection.normalized * 0.05 * dt
                 }
 
+                node.nextPosition += node.initialDirection.normalized * 10.0 * dt
 
                //
 
@@ -217,12 +228,21 @@ class Graph(val origin: Vector2) {
              for (edge in edges) {
                  val diff = edge.a.position - edge.b.position
                  if (diff.length > 0.0) {
-                     val force = (diff * ((diff.length - edge.targetLength) / diff.length * dt)) * stiffness
+                     val force = (diff * ((diff.length - edge.targetLength) / diff.length * dt)) * stiffness * 1.1
                      edge.a.nextPosition -= force
                      edge.b.nextPosition += force
+
+                     if (diff.length > edge.targetLength) {
+                         val direction = diff.normalized
+                         val moveDistance = diff.length - edge.targetLength
+                         edge.b.nextPosition += direction * moveDistance * dt * stiffness
+                     }
                  }
              }
 
+            for (node in nodes) {
+                node.nextPosition += displacer(node)
+            }
 
             for (node in nodes) {
 
@@ -237,57 +257,6 @@ class Graph(val origin: Vector2) {
         }
 
         circleBounds = findCircleBounds()
-    }
-
-    fun draw(drawer: Drawer) {
-        drawer.fontMap = defaultFontMap
-
-        drawer.stroke = ColorRGBa.WHITE
-        for (node in nodes) {
-            traverse(node) {
-                if (it.children.isNotEmpty()) {
-                    val mid = LineSegment(it.children.first().position, it.children.last().position).position(0.5)
-
-                    if (it.children.size == 1) {
-                        val positions = Segment2D(it.position, it.children[0].position).equidistantPositions(20)
-                        drawer.circles {
-                            for ((i, p) in positions.withIndex()) {
-                                val t = smoothstep(0.0, 0.8, i.toDouble() / positions.size)
-                                this.fill = ColorRGBa.BLACK.mix(ColorRGBa.TURQUOISE, t)
-                                this.circle(p, t)
-                            }
-                        }
-                        return@traverse
-                    }
-
-                    for (i in 0 until it.children.size) {
-                        val next = if (i < it.children.size - 1) it.children[i + 1].position else it.children[i].position * 2.0 - it.children[i - 1].position
-                        val c0 = Segment2D(it.position, mid).position(0.5)
-                        val c1 =  Segment2D(it.children[i].position, next).normal(0.5) * -10.0 * (0.5) + it.children[i].position
-
-                        val positions = Segment2D(it.position, c0, c1, it.children[i].position).equidistantPositions(20)
-                        drawer.stroke = null
-                        drawer.circles {
-                            for ((i, p) in positions.withIndex()) {
-                                val t = smoothstep(0.0, 0.8, i.toDouble() / positions.size)
-                                this.fill = ColorRGBa.BLACK.mix(ColorRGBa.TURQUOISE, t)
-                                this.circle(p, t)
-                            }
-                        }
-
-
-                    }
-                }
-            }
-        }
-
-//        for (edge in edges) {
-//            edge.draw(drawer)
-//        }
-
-        drawer.stroke = ColorRGBa.PURPLE
-        drawer.fill = null
-        drawer.circle(circleBounds)
     }
 
 }
